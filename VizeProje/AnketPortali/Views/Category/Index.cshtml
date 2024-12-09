@@ -1,0 +1,208 @@
+
+@{
+    ViewData["Title"] = "Kategoriler";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Kategoriler</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-primary" onclick="showAddModal()">
+                    Yeni Kategori Ekle
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <table id="categoryTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Kategori Adı</th>
+                        <th>Açıklama Adı</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTableBody">
+                    <!-- Veriler Ajax ile doldurulacak -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Kategori Ekleme Modalı -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Kategori Ekle</h5>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal('addCategoryModal')" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addCategoryForm">
+                    <div class="form-group">
+                        <label for="categoryName">Kategori Adı</label>
+                        <input type="text" class="form-control" id="categoryName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryDescription">Kategori Adı</label>
+                        <input type="text" class="form-control" id="categoryDescription" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addCategoryModal')">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="addCategory()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kategori Düzenleme Modalı -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kategori Düzenle</h5>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal('editCategoryModal')" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editCategoryForm">
+                    <input type="hidden" id="editCategoryId">
+                    <div class="form-group">
+                        <label for="editCategoryName">Kategori Adı</label>
+                        <input type="text" class="form-control" id="editCategoryName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editcategoryDescription">Kategori Adı</label>
+                        <input type="text" class="form-control" id="editcategoryDescription" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editCategoryModal')">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="updateCategory()">Güncelle</button>
+            </div>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadCategories();
+        });
+        function closeModal(modalId) {
+            $('#' + modalId).modal('hide');
+        }
+        function loadCategories() {
+            $.ajax({
+                url: '/Category/GetAllCategories',
+                type: 'GET',
+                success: function (data) {
+                    var tbody = $('#categoryTableBody');
+                    tbody.empty();
+                    
+                    data.forEach(function (category) {
+                        var row = `
+                            <tr>
+                                <td>${category.id}</td>
+                                <td>${category.name}</td>
+                                <td> ${category.description}   </td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="showEditModal(${category.id})">Düzenle</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteCategory(${category.id})">Sil</button>
+                                </td>
+                            </tr>`;
+                        tbody.append(row);
+                    });
+                },
+                error: function (error) {
+                    alert('Kategoriler yüklenirken bir hata oluştu!');
+                }
+            });
+        }
+
+        function showAddModal() {
+            $('#categoryName').val('');
+            $('#categoryDescription').val('');
+            $('#addCategoryModal').modal('show');
+        }
+
+        function showEditModal(id) {
+            $.get('/Category/GetCategory/' + id, function (data) {
+                $('#editCategoryId').val(data.id);
+                $('#editCategoryName').val(data.name);
+                $('#editcategoryDescription').val(data.description);
+                $('#editCategoryModal').modal('show');
+            });
+        }
+
+        function addCategory() {
+            var categoryData = {
+                name: $('#categoryName').val(),
+                description: $('#categoryDescription').val() // Doğru alan ismi ve virgül eklendi
+            };
+
+            $.ajax({
+                url: '/Category/Create',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(categoryData),
+                success: function (result) {
+                    $('#addCategoryModal').modal('hide');
+                    loadCategories(); // Sayfayı yenilemek yerine tabloyu güncelle
+                },
+                error: function (error) {
+                    alert('Kategori eklenirken bir hata oluştu!');
+                }
+            });
+        }
+
+        function updateCategory() {
+            var categoryData = {
+                id: $('#editCategoryId').val(),
+                name: $('#editCategoryName').val(),
+                description: $('#editcategoryDescription').val() // Virgül eksikliği giderildi
+            };
+
+            $.ajax({
+                url: '/Category/Edit',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(categoryData),
+                success: function (result) {
+                    $('#editCategoryModal').modal('hide');
+                    loadCategories(); // Sayfayı yenilemek yerine tabloyu güncelle
+                },
+                error: function (error) {
+                    alert('Kategori güncellenirken bir hata oluştu!');
+                }
+            });
+        }
+
+        function deleteCategory(id) {
+            if (confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')) {
+                $.ajax({
+                    url: '/Category/Delete/' + id,
+                    type: 'POST',
+                    success: function (result) {
+                        loadCategories(); // Sayfayı yenilemek yerine tabloyu güncelle
+                    },
+                    error: function (error) {
+                        alert('Kategori silinirken bir hata oluştu!');
+                    }
+                });
+            }
+        }
+    </script>
+} 

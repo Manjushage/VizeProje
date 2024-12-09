@@ -1,0 +1,41 @@
+﻿@model List<AnketPortali.ViewModel.UserModel>
+@{
+    ViewData["Title"] = "UserList";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Üyeler</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Uye Adi</th>
+                        <th>Uye Email</th>
+
+                        <th>Üye Tarihi</th>
+                      
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Username</td>
+                            <td>@item.Email</td>
+                            <td>@item.CreatedAt</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+
+

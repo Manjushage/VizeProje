@@ -1,0 +1,39 @@
+﻿
+@{
+    ViewData["Title"] = "TakeSurvey";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model List<Question>
+
+<div class="container">
+    <h2>Anket: @Model.FirstOrDefault()?.Survey?.Title</h2>
+
+    <form asp-action="SubmitAnswers" method="post">
+        <input name="Surveyids" id="Surveyids" value="@ViewBag.SurveyId" />
+
+        @foreach (var question in Model)
+        {
+            <div class="form-group">
+                <label>@question.QuestionText</label>
+
+                @foreach (var answer in question.Answers)
+                {
+                    <div class="form-check">
+                        <!-- Her cevaba QuestionId'yi de ekliyoruz -->
+                        <input type="radio" class="form-check-input"
+                               id="answer_@answer.Id"
+                               name="answers[@question.Id].AnswerValue"
+                               value="@answer.AnswerValue" />
+                        <input type="hidden" name="answers[@question.Id].QuestionId" value="@question.Id" />
+                        <label class="form-check-label" for="answer_@answer.Id">@answer.AnswerValue</label>
+                    </div>
+                }
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary">Cevapları Gönder</button>
+    </form>
+</div>
+
+
+

@@ -1,0 +1,52 @@
+@model IEnumerable<AnketPortali.Models.Survey>
+@{
+    ViewData["Title"] = "Anketler";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Anketler</h3>
+            <div class="card-tools">
+                <a asp-action="Create" class="btn btn-primary">
+                    Yeni Anket Ekle
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Başlık</th>
+                        <th>Açıklama</th>
+                        
+                        <th>Kategori</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Title</td>
+                            <td>@item.Description</td>
+                            
+                            <td>@item.Category?.Name</td>
+                            <td>@(item.IsActive ? "Aktif" : "Pasif")</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Düzenle</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" 
+                                   onclick="return confirm('Bu anketi silmek istediğinizden emin misiniz?')">Sil</a>
+                                <a asp-action="AddQuestion" asp-route-surveyId="@item.Id" class="btn btn-primary btn-sm">Soru Ekle</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
